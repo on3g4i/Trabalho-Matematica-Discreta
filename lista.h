@@ -16,4 +16,11 @@ int PreencheLista(Lista *L, Cidade c);
 //Verifica Se a Lista está vazia
 int Vazia (Lista *L);
 
+//calcula distancia euclidiana entre duas cidades
+double distEuclidiana(double x1, double y1, double x2, double y2 );
+//preenche a matriz 12x12
+void PreencheMatriz(Lista *L, double matriz[MAXTAM][MAXTAM]);
+
+void ImprimeMatriz(Lista *L, double matriz[MAXTAM][MAXTAM]);
+
 #endif
