@@ -3,9 +3,8 @@
 #include <stdlib.h>
 #include "lista.h"
 
-double distEuclidiana(double x1, double y1, double x2, double y2 ){
-    return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
-}
+
+
 Lista * ListaCompletaCidades (Lista * Lista,  FILE *arquivo){
    if(Lista == NULL){
         Lista = CriaLista();
@@ -18,14 +17,14 @@ Lista * ListaCompletaCidades (Lista * Lista,  FILE *arquivo){
         while (fscanf(arquivo, "%lf %lf", &c.x, &c.y) == 2) {
         contador++;
 
-        if(PreencheLista(Lista, c)){
-            printf("Cidade %d preenchida com sucesso\n", contador);
-        } else{
-            printf("Erro, Lista de Cidades Cheia");
-        }
-    } 
+            if(PreencheLista(Lista, c)){
+                printf("Cidade %d preenchida com sucesso\n", contador);
+            } else {
+                printf("Erro, Lista de Cidades Cheia");
+            }
+        } 
         return Lista;
-}
+    }
 }
 
 int main(){
@@ -42,7 +41,9 @@ int main(){
     if(Cidades == NULL){
         printf("Erro, não foi possível preencher as cidades na lista\n");
     } else {
-        
+        double matriz[MAXTAM][MAXTAM] = {0};
+        PreencheMatriz(Cidades, matriz);
+        ImprimeMatriz(Cidades, matriz);
     }   
 
     return 0;
