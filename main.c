@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "lista.h"
-#include "pilha.h"
 //Distância euclidiana entre (x1,y1) e (x2,y2)
 double distEuclidiana(double x1, double y1, double x2, double y2)
 {
@@ -77,19 +76,21 @@ Lista *ListaCompletaCidades(Lista *Lista, FILE *arquivo)
         return Lista;
     }
 }
-//Imprime o caminho recursivamente, seguindo os predecessores até a origem
-static void ImprimeCaminho(Lista *l, int atual, int inicio)
+//Imprime os menores caminhos
+ void ImprimeMenoresCaminhos(
+    int caminhos[5][MAXTAM], int tamanhos[5], double distancias[5], int quantidade)
 {
-    //Caso base: chegou à cidade de origem
-    if (atual == inicio) {
-        printf("C%d", atual + 1);
-        return;
+    double distanciaTotal = 0;
+    // Exibe os caminhos armazenados em ordem e soma suas distâncias.
+    for (int i = 0; i < quantidade; i++) {
+        printf("%d) ", i + 1);
+        for (int j = 0; j < tamanhos[i]; j++) {
+            printf("%sC%d", j == 0 ? "" : " -> ", caminhos[i][j] + 1);
+        }
+        printf(" | Distância: %.2f\n", distancias[i]);
+        distanciaTotal += distancias[i];
     }
-
-    //Recupera a cidade anterior armazenada no campo visita
-    int anterior = l->Item[atual].visita - 2;
-    ImprimeCaminho(l, anterior, inicio);
-    printf(" -> C%d", atual + 1);
+    printf("Distância total dos caminhos: %.2f\n", distanciaTotal);
 }
 
 //Função responsável por pegar todos os caminhos possíveis entre c1 e c2.
@@ -97,6 +98,11 @@ void CaminhoCidades(Cidade c1, Cidade c2, double matriz[MAXTAM][MAXTAM], Lista *
     //Mantém a profundidade da busca e a cidade de origem entre chamadas recursivas
     static int profundidade = 0;
     static int origemBusca = -1;
+    // Armazenam, em ordem crescente de distância, no máximo cinco caminhos.
+    static int menores[5][MAXTAM];
+    static int tamanhos[5];
+    static double distancias[5];
+    static int quantidadeMenores = 0;
 
     //Encontra os índices das cidades na lista
     int inicio = Busca(l, c1);
@@ -112,15 +118,64 @@ void CaminhoCidades(Cidade c1, Cidade c2, double matriz[MAXTAM][MAXTAM], Lista *
             l->Item[i].visita = NAOVISITADA;
         }
         origemBusca = inicio;
+        quantidadeMenores = 0;
         l->Item[inicio].visita = VISITADA;
     }
 
-    //Ao alcançar o destino, imprime o caminho encontrado
+    //Ao alcançar o destino, registra o caminho se estiver entre os cinco menores.
     if (inicio == destino) {
-        ImprimeCaminho(l, inicio, origemBusca);
-        printf("\n");
+        int candidato[MAXTAM];
+        int tamanho = 0;
+        int atual = destino;
+        // Reconstrói o caminho seguindo os predecessores registrados na busca.
+        while (atual != origemBusca) {
+            candidato[tamanho++] = atual;
+            atual = l->Item[atual].visita - 2;
+        }
+        candidato[tamanho++] = origemBusca;
+        // A reconstrução começa no destino; inverte para guardar da origem ao destino.
+        for (int i = 0; i < tamanho / 2; i++) {
+            int troca = candidato[i];
+            candidato[i] = candidato[tamanho - i - 1];
+            candidato[tamanho - i - 1] = troca;
+        }
+
+        double distancia = 0;
+        // Soma as distâncias entre cidades consecutivas do caminho.
+        for (int i = 1; i < tamanho; i++) {
+            distancia += matriz[candidato[i - 1]][candidato[i]];
+        }
+
+        // Localiza a posição do caminho na lista ordenada de menores distâncias.
+        int posicao = 0;
+        while (posicao < quantidadeMenores &&
+               distancias[posicao] <= distancia) {
+            posicao++;
+        }
+        if (posicao < 5) {
+            // Abre espaço e insere o candidato se ele estiver entre os cinco menores.
+            if (quantidadeMenores < 5) {
+                quantidadeMenores++;
+            }
+            for (int i = quantidadeMenores - 1; i > posicao; i--) {
+                distancias[i] = distancias[i - 1];
+                tamanhos[i] = tamanhos[i - 1];
+                for (int j = 0; j < tamanhos[i]; j++) {
+                    menores[i][j] = menores[i - 1][j];
+                }
+            }
+            distancias[posicao] = distancia;
+            tamanhos[posicao] = tamanho;
+            for (int i = 0; i < tamanho; i++) {
+                menores[posicao][i] = candidato[i];
+            }
+        }
+
         if (profundidade == 0) {
             l->Item[inicio].visita = NAOVISITADA;
+            printf("Os %d menores caminhos entre C%d e C%d:\n",
+                   quantidadeMenores, origemBusca + 1, destino + 1);
+            ImprimeMenoresCaminhos(menores, tamanhos, distancias, quantidadeMenores);
         }
         return;
     }
@@ -142,6 +197,15 @@ void CaminhoCidades(Cidade c1, Cidade c2, double matriz[MAXTAM][MAXTAM], Lista *
     //Ao encerrar a busca, desmarca a cidade de origem
     if (profundidade == 0) {
         l->Item[inicio].visita = NAOVISITADA;
+        // A busca completa terminou: imprime somente os caminhos armazenados.
+        if (quantidadeMenores == 0) {
+            printf("Nenhum caminho encontrado entre as cidades.\n");
+            printf("Distância total dos caminhos: 0.00\n");
+        } else {
+            printf("Os %d menores caminhos entre C%d e C%d:\n",
+                   quantidadeMenores, origemBusca + 1, destino + 1);
+            ImprimeMenoresCaminhos(menores, tamanhos, distancias, quantidadeMenores);
+        }
     }
 }
 int main()
