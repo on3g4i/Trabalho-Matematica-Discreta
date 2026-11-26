@@ -23,34 +23,18 @@ int PreencheLista(Lista *L , Cidade c){
 int Vazia (Lista *L){
     return !L->Tamanho;
 }
-
-double distEuclidiana(double x1, double y1, double x2, double y2 ){
-    return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
-}
-
-void PreencheMatriz(Lista *L, double matriz[MAXTAM][MAXTAM]){
-    for(int i = 0; i<L->Tamanho; i++){
-        matriz[i][i] = 0;                                                                        //cidade com ela mesma é 0
-        for(int j = i+1; j<L->Tamanho; j++){
-            double d = distEuclidiana(L->Item[i].x, L->Item[i].y, L->Item[j].x, L->Item[j].y);   //calcula a distancia
-            matriz[i][j] = d;                                                                    //triangulo superior igual ao triandulo inferior
-            matriz[j][i] = d;
+int Busca(Lista *L, Cidade c){
+    if(Vazia(L)){
+        return -1;
+    } else {
+        for (int i = 0; i < L->Tamanho; i++)
+        {
+            if(L->Item[i].x == c.x && L->Item[i].y == c.y){
+                return i;
+            }
         }
+        return -1;
     }
 }
+   
 
-void ImprimeMatriz(Lista *L, double matriz[MAXTAM][MAXTAM]){
-    printf(" Matriz %d x %d\n", L->Tamanho, L->Tamanho);
-    printf("         ");                                                                         //pra linha de cima da tabela ficar alinhada quando printa
-    for(int i = 0; i<L->Tamanho; i++){
-        printf("C%-7d", i+1);                                                                    //printa a cidade
-    }
-    printf("\n");
-    for(int i = 0; i<L->Tamanho; i++){
-        printf("C%-4d", i+1);                                                                    //printa cidade
-        for(int j = 0; j<L->Tamanho; j++){
-            printf("%8.2f", matriz[i][j]);                                                       //printa resultado
-        }
-        printf("\n");
-    }
-}

@@ -1,8 +1,11 @@
 #ifndef _LISTA_
 #define _LISTA_
 #define MAXTAM 12
+#define VISITADA 1
+#define NAOVISITADA 0
 typedef struct Cidade {
     double x, y;
+    int visita;
 }Cidade;
 
 typedef struct Lista{
@@ -16,11 +19,6 @@ int PreencheLista(Lista *L, Cidade c);
 //Verifica Se a Lista está vazia
 int Vazia (Lista *L);
 
-//calcula distancia euclidiana entre duas cidades
-double distEuclidiana(double x1, double y1, double x2, double y2 );
-//preenche a matriz 12x12
-void PreencheMatriz(Lista *L, double matriz[MAXTAM][MAXTAM]);
-
-void ImprimeMatriz(Lista *L, double matriz[MAXTAM][MAXTAM]);
+int Busca(Lista *L, Cidade c);
 
 #endif
